@@ -20,6 +20,24 @@
             <div>
                 <input type="password" placeholder="password" id="password" name="password">
             </div>
+
+            <div class="col-md-6 captcha">
+                <span>{!! captcha_img() !!}</span>
+                <button type="button" class="btn btn-danger" class="reload" id="reload">
+                    &#x21bb;
+                </button>
+            </div>
+
+            <div class="form-group row">
+                <div>
+                    <input id="captcha" type="text" placeholder="Enter Captcha" name="captcha">
+
+                    @error('captcha')
+                    <div class="alert alert-danger" {{ $message }}></div>
+                    @enderror
+                </div>
+            </div>
+
             <div class="pt-2">
                 <input type="submit">
             </div>
@@ -29,4 +47,18 @@
 
 </body>
 
+
 </html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+    $('#reload').click(function() {
+        $.ajax({
+            type: 'GET',
+            url: 'reload-captcha',
+            success: function(data) {
+                $(".captcha span").html(data.captcha);
+            }
+        });
+    });
+</script>

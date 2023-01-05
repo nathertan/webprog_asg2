@@ -8,9 +8,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    public function reloadCaptcha()
+    {
+        return response()->json(['captcha' => captcha_img()]);
+    }
+
     public function loginPage()
     {
         return view('login');
@@ -22,16 +28,29 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required|email',
+                'password' => 'required',
+                'captcha' => 'required|captcha',
+            ],
+            [
+                'captcha.captcha' => 'Invalid captcha code.',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return back()->withInput()->withErrors($validator);
+        }
+
         try {
             $credentials = request(['email', 'password']);
 
             if (!Auth::attempt($credentials)) {
                 RateLimiter::hit($this->throttleKey(), $seconds = 30);
 
-                return response()->json([
-                    'status_code' => 401,
-                    'message' => 'Unauthorized'
-                ]);
+                echo ('Unauthorized');
             }
 
             if (!Hash::check($request->password, $user->password, [])) {
@@ -47,7 +66,6 @@ class AuthController extends Controller
             return response()->json([
                 'status_code' => 500,
                 'message' => 'Error while Logging in',
-                'error' => $error,
             ]);
         }
     }

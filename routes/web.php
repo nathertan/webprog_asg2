@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'loginPage']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/reload-captcha', [AuthController::class, 'reloadCaptcha']);
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
